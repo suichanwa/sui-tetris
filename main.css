@@ -1,0 +1,36 @@
+body{
+	background-image: url("suichanbackground.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+*{
+	margin:0;
+	padding:0;
+}
+.canvas_wrap{
+	display:block;
+	margin:0 auto;
+	padding: 100px;
+}
+.canvas_wrap>*{
+	display:block;
+	margin:0 auto;
+	border: 1px solid #6764fd;
+}
+.canvas_wrap>button{
+	font-family:1px monospace;
+	font-size:40px;
+	font-weight:bold;
+	border:none;
+    background-color:#000000;
+	color:#ffffff;
+}
+
+.keys{
+    color:#ffffff;
+    font-family: Hack;
+    font-size: 15px;
+    position: absolute;
+    top: 580px; 
+    left: 540px;
+}
