@@ -11,6 +11,7 @@ const GlobalStyles = createGlobalStyle`
     background: url(${bgImage}) #000;
     background-size: cover;
     background-position: center;
+    overscroll-behavior: none;
   }
 `;
 

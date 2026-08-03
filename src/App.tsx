@@ -11,6 +11,7 @@ import { useGameStatus } from './hooks/useGameStatus';
 import Stage from './components/Stage/Stage';
 import Display from './components/Display/Display';
 import StartButton from './components/StartButton/StartButton';
+import TouchControls from './components/TouchControls/TouchControls';
 
 // Styles
 import { StyledTetrisWrapper, StyledTetris } from './App.styles';
@@ -90,6 +91,14 @@ const App: React.FC = () => {
     }
   };
 
+  const softDropStart = (): void => {
+    if (!gameOver) setDroptime(30);
+  };
+
+  const softDropEnd = (): void => {
+    if (!gameOver) setDroptime(1000 / level + 200);
+  };
+
   useInterval(() => {
     drop();
   }, dropTime);
@@ -112,6 +121,15 @@ const App: React.FC = () => {
           )}
         </div>
         <Stage stage={stage} />
+        {!gameOver && (
+          <TouchControls
+            onLeft={() => movePlayer(-1)}
+            onRight={() => movePlayer(1)}
+            onRotate={() => playerRotate(stage)}
+            onSoftDropStart={softDropStart}
+            onSoftDropEnd={softDropEnd}
+          />
+        )}
       </StyledTetris>
     </StyledTetrisWrapper>
   );
