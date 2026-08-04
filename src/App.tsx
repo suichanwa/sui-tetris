@@ -12,6 +12,8 @@ import Stage from './components/Stage/Stage';
 import Display from './components/Display/Display';
 import StartButton from './components/StartButton/StartButton';
 import TouchControls from './components/TouchControls/TouchControls';
+import IconBar from './components/IconBar/IconBar';
+import Modal from './components/Modal/Modal';
 
 // Styles
 import { StyledTetrisWrapper, StyledTetris } from './App.styles';
@@ -19,8 +21,19 @@ import { StyledTetrisWrapper, StyledTetris } from './App.styles';
 const App: React.FC = () => {
   const [dropTime, setDroptime] = React.useState<null | number>(null);
   const [gameOver, setGameOver] = React.useState(true);
+  const [highQuality, setHighQuality] = React.useState(() => localStorage.getItem('highQuality') !== 'false');
+  const [helpOpen, setHelpOpen] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const modalOpen = helpOpen || settingsOpen;
 
   const gameArea = React.useRef<HTMLDivElement>(null);
+
+  const toggleQuality = (): void => {
+    setHighQuality(prev => {
+      localStorage.setItem('highQuality', String(!prev));
+      return !prev;
+    });
+  };
 
   const { player, updatePlayerPos, resetPlayer, playerRotate } = usePlayer();
   const { stage, setStage, rowsCleared } = useStage(player, resetPlayer);
@@ -33,9 +46,9 @@ const App: React.FC = () => {
   };
 
   const keyUp = ({ keyCode }: { keyCode: number }): void => {
-    if (!gameOver) {
-      // Change the droptime speed when user releases down arrow
-      if (keyCode === 40) {
+    if (!gameOver && !modalOpen) {
+      // Change the droptime speed when user releases down arrow / s
+      if (keyCode === 40 || keyCode === 83) {
         setDroptime(1000 / level + 200);
       }
     }
@@ -55,16 +68,19 @@ const App: React.FC = () => {
   };
 
   const move = ({ keyCode, repeat }: { keyCode: number; repeat: boolean }): void => {
-    if (!gameOver) {
-      if (keyCode === 37) {
+    if (!gameOver && !modalOpen) {
+      if (keyCode === 37 || keyCode === 65) {
+        // Left / A
         movePlayer(-1);
-      } else if (keyCode === 39) {
+      } else if (keyCode === 39 || keyCode === 68) {
+        // Right / D
         movePlayer(1);
-      } else if (keyCode === 40) {
-        // Just call once
+      } else if (keyCode === 40 || keyCode === 83) {
+        // Down / S — just call once
         if (repeat) return;
         setDroptime(30);
-      } else if (keyCode === 38) {
+      } else if (keyCode === 38 || keyCode === 87) {
+        // Up / W
         playerRotate(stage);
       }
     }
@@ -101,11 +117,17 @@ const App: React.FC = () => {
 
   useInterval(() => {
     drop();
-  }, dropTime);
+  }, modalOpen ? null : dropTime);
 
   return (
     <StyledTetrisWrapper role='button' tabIndex={0} onKeyDown={move} onKeyUp={keyUp} ref={gameArea}>
       <StyledTetris>
+        <IconBar
+          highQuality={highQuality}
+          onToggleQuality={toggleQuality}
+          onOpenHelp={() => setHelpOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
         <div className='display'>
           {gameOver ? (
             <>
@@ -120,7 +142,7 @@ const App: React.FC = () => {
             </>
           )}
         </div>
-        <Stage stage={stage} />
+        <Stage stage={stage} highQuality={highQuality} />
         {!gameOver && (
           <TouchControls
             onLeft={() => movePlayer(-1)}
@@ -131,6 +153,19 @@ const App: React.FC = () => {
           />
         )}
       </StyledTetris>
+      {helpOpen && (
+        <Modal title='How to play' onClose={() => setHelpOpen(false)}>
+          <p>Keyboard: ← → to move, ↑ / W to rotate, ↓ / S to soft drop.</p>
+          <p>WASD: A left, D right, W rotate, S soft drop.</p>
+          <p>Touch: use the on-screen D-pad below the board.</p>
+          <p>Clear full rows to score. Speed increases every 10 rows.</p>
+        </Modal>
+      )}
+      {settingsOpen && (
+        <Modal title='Settings' onClose={() => setSettingsOpen(false)}>
+          <p>More settings coming soon.</p>
+        </Modal>
+      )}
     </StyledTetrisWrapper>
   );
 };

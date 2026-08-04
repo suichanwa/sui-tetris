@@ -8,12 +8,13 @@ export type STAGE = STAGECELL[][];
 
 type Props = {
   stage: STAGE;
+  highQuality: boolean;
 }
 
-const Stage: React.FC<Props> = ({ stage }) => (
+const Stage: React.FC<Props> = ({ stage, highQuality }) => (
   <StyledStageContainer>
     <StyledStage>
-      {stage.map(row => row.map((cell, x) => <Cell key={x} type={cell[0]} /> ))}
+      {stage.map(row => row.map((cell, x) => <Cell key={x} type={cell[0]} highQuality={highQuality} /> ))}
     </StyledStage>
   </StyledStageContainer>
 )
