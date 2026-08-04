@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [highQuality, setHighQuality] = React.useState(() => localStorage.getItem('highQuality') !== 'false');
   const [helpOpen, setHelpOpen] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [textureVersion, setTextureVersion] = React.useState(0);
   const modalOpen = helpOpen || settingsOpen;
 
   const gameArea = React.useRef<HTMLDivElement>(null);
@@ -34,6 +35,10 @@ const App: React.FC = () => {
       return !prev;
     });
   };
+
+  // Bust the browser's image cache so replacing files on disk (e.g. re-running
+  // an upscaler) shows up immediately, without reloading the page.
+  const refreshTextures = (): void => setTextureVersion(prev => prev + 1);
 
   const { player, updatePlayerPos, resetPlayer, playerRotate } = usePlayer();
   const { stage, setStage, rowsCleared } = useStage(player, resetPlayer);
@@ -68,7 +73,11 @@ const App: React.FC = () => {
   };
 
   const move = ({ keyCode, repeat }: { keyCode: number; repeat: boolean }): void => {
-    if (!gameOver && !modalOpen) {
+    if (gameOver) {
+      if (keyCode === 13 && !modalOpen && !repeat) handleStartGame();
+      return;
+    }
+    if (!modalOpen) {
       if (keyCode === 37 || keyCode === 65) {
         // Left / A
         movePlayer(-1);
@@ -125,6 +134,7 @@ const App: React.FC = () => {
         <IconBar
           highQuality={highQuality}
           onToggleQuality={toggleQuality}
+          onRefreshTextures={refreshTextures}
           onOpenHelp={() => setHelpOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
         />
@@ -142,7 +152,7 @@ const App: React.FC = () => {
             </>
           )}
         </div>
-        <Stage stage={stage} highQuality={highQuality} />
+        <Stage stage={stage} highQuality={highQuality} textureVersion={textureVersion} />
         {!gameOver && (
           <TouchControls
             onLeft={() => movePlayer(-1)}
@@ -155,6 +165,7 @@ const App: React.FC = () => {
       </StyledTetris>
       {helpOpen && (
         <Modal title='How to play' onClose={() => setHelpOpen(false)}>
+          <p>Press Enter to start.</p>
           <p>Keyboard: ← → to move, ↑ / W to rotate, ↓ / S to soft drop.</p>
           <p>WASD: A left, D right, W rotate, S soft drop.</p>
           <p>Touch: use the on-screen D-pad below the board.</p>

@@ -9,12 +9,17 @@ export type STAGE = STAGECELL[][];
 type Props = {
   stage: STAGE;
   highQuality: boolean;
+  textureVersion: number;
 }
 
-const Stage: React.FC<Props> = ({ stage, highQuality }) => (
+const Stage: React.FC<Props> = ({ stage, highQuality, textureVersion }) => (
   <StyledStageContainer>
     <StyledStage>
-      {stage.map(row => row.map((cell, x) => <Cell key={x} type={cell[0]} highQuality={highQuality} /> ))}
+      {stage.map(row =>
+        row.map((cell, x) => (
+          <Cell key={x} type={cell[0]} highQuality={highQuality} textureVersion={textureVersion} />
+        ))
+      )}
     </StyledStage>
   </StyledStageContainer>
 )
